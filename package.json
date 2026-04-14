@@ -1,0 +1,20 @@
+{
+  "name": "helpdesk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "extract": "node scripts/extract-pdf.mjs",
+    "upload-rules-local": "wrangler kv key put --binding=HELPDESK_KV --local rules_text --path=rules.txt",
+    "upload-rules": "wrangler kv key put --binding=HELPDESK_KV rules_text --path=rules.txt",
+    "upload-schedule-local": "wrangler kv key put --binding=HELPDESK_KV --local class_schedule --path=schedule.txt",
+    "upload-schedule": "wrangler kv key put --binding=HELPDESK_KV class_schedule --path=schedule.txt",
+    "upload-samples-local": "wrangler kv key put --binding=HELPDESK_KV --local rules_text --path=scripts/sample-rules.txt && wrangler kv key put --binding=HELPDESK_KV --local class_schedule --path=scripts/sample-schedule.txt"
+  },
+  "devDependencies": {
+    "pdf-parse": "^1.1.1",
+    "wrangler": "^3.90.0"
+  }
+}

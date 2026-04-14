@@ -1,0 +1,29 @@
+SAMPLE MLS RULES AND REGULATIONS (PLACEHOLDER CONTENT FOR TESTING)
+
+This file is a placeholder used to verify the help desk works end-to-end before you load the real MLS Rules & Regulations PDF. Replace it by running the ingest script with the real PDF.
+
+SECTION 1 — LISTING REQUIREMENTS
+1.1 All exclusive right-to-sell listings must be entered into the MLS within 2 business days of the seller's signature.
+1.2 Listing photos must be uploaded within 5 business days of entry. A minimum of 1 photo is required; the primary photo must depict the front exterior of the property.
+1.3 Listings must include accurate square footage, bedroom count, bathroom count, and lot size.
+
+SECTION 2 — STATUS CHANGES
+2.1 Status changes (pending, sold, withdrawn, expired) must be reported within 2 business days of the event.
+2.2 Sold prices must reflect the actual closing price as recorded on the settlement statement.
+
+SECTION 3 — COMMISSIONS AND COOPERATION
+3.1 Offers of compensation to cooperating brokers must be explicit and unconditional at the time of listing submission.
+3.2 Changes to compensation may only be made in writing and communicated to all cooperating brokers before an offer is submitted.
+
+SECTION 4 — VIOLATIONS AND FINES
+4.1 First violation of any listing rule: written warning.
+4.2 Second violation within 12 months: $100 fine.
+4.3 Third and subsequent violations within 12 months: $250 fine per occurrence.
+4.4 All fines must be paid within 30 days of notice. Unpaid fines may result in suspension of MLS access.
+
+SECTION 5 — CODE OF CONDUCT
+5.1 Members must treat all other members, clients, and customers with professionalism and respect.
+5.2 Disparagement of competitors' listings or business practices in the MLS system is prohibited.
+5.3 Members must comply with all applicable fair housing laws.
+
+END OF SAMPLE CONTENT.

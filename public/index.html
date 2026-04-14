@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Greater Louisville Association of REALTORS — Help Desk Demo</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; margin: 0; color: #333; background: #fff; line-height: 1.5; }
+
+    /* Top utility bar */
+    .topbar { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 12px 32px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo-mark { width: 44px; height: 44px; background: #1f4e79; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; border-radius: 2px; letter-spacing: 1px; }
+    .logo-text { font-size: 11px; color: #333; line-height: 1.2; }
+    .logo-text strong { display: block; font-size: 13px; color: #1f4e79; letter-spacing: 0.5px; }
+    .logo-text span { color: #888; font-size: 10px; }
+
+    .top-actions { display: flex; align-items: center; gap: 16px; font-size: 13px; }
+    .search-link, .social-icons a { color: #555; text-decoration: none; }
+    .search-link:hover { color: #1f4e79; }
+    .social-icons { display: flex; gap: 10px; }
+    .social-icons a { width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; color: #1f4e79; }
+    .chat-trigger { background: none; border: 1px solid #1f4e79; color: #1f4e79; padding: 6px 14px; border-radius: 4px; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-weight: 500; }
+    .chat-trigger:hover { background: #1f4e79; color: #fff; }
+    .chat-trigger svg { width: 14px; height: 14px; }
+    .portal-btn { background: #1f4e79; color: #fff; border: none; padding: 8px 18px; border-radius: 4px; font-size: 13px; cursor: pointer; font-weight: 500; }
+    .portal-btn:hover { background: #163a5c; }
+
+    /* Main nav */
+    .mainnav { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 0 32px; display: flex; justify-content: flex-end; }
+    .mainnav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 4px; }
+    .mainnav a { display: block; padding: 16px 18px; color: #333; text-decoration: none; font-size: 14px; font-weight: 500; }
+    .mainnav a:hover { color: #1f4e79; }
+
+    /* Hero */
+    .hero { position: relative; height: 420px; background: linear-gradient(135deg, #1f4e79 0%, #2d6fa8 50%, #4a90c2 100%); overflow: hidden; display: flex; align-items: center; }
+    .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at bottom, rgba(0,0,0,0.4), transparent 70%); }
+    .hero-skyline { position: absolute; bottom: 0; left: 0; right: 0; height: 60%; background: linear-gradient(to top, rgba(0,0,0,0.5), transparent); }
+    .hero-content { position: relative; padding: 0 60px; color: #fff; max-width: 700px; }
+    .hero-content .eyebrow { font-size: 16px; font-weight: 300; letter-spacing: 1px; margin-bottom: 12px; opacity: 0.95; }
+    .hero-content h1 { font-size: 44px; font-weight: 700; margin: 0; line-height: 1.1; letter-spacing: 0.5px; }
+
+    /* Notice banner */
+    .notice { background: #e8eef5; text-align: center; padding: 18px 20px; font-size: 14px; color: #333; border-bottom: 1px solid #d4dce6; }
+    .notice strong { display: block; margin-bottom: 6px; font-size: 13px; color: #555; letter-spacing: 0.5px; }
+    .notice a { color: #1f4e79; text-decoration: underline; font-weight: 600; }
+
+    /* Body */
+    main { max-width: 900px; margin: 48px auto; padding: 0 20px; }
+    main p { font-size: 15px; color: #444; margin-bottom: 18px; }
+
+    @media (max-width: 720px) {
+      .topbar { flex-direction: column; gap: 12px; padding: 12px 16px; }
+      .mainnav { padding: 0 16px; overflow-x: auto; }
+      .hero-content { padding: 0 24px; }
+      .hero-content h1 { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-mark">GLAR</div>
+      <div class="logo-text">
+        <strong>GREATER LOUISVILLE</strong>
+        <span>ASSOCIATION OF REALTORS&reg;</span>
+      </div>
+    </div>
+    <div class="top-actions">
+      <a class="search-link" href="#">&#128269; Search</a>
+      <div class="social-icons">
+        <a href="#" aria-label="Facebook"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 10-11.5 9.9V15h-2v-3h2V9.5C10.5 7.6 11.7 6.5 13.4 6.5c.8 0 1.6.1 1.6.1v2h-1c-1 0-1.3.6-1.3 1.2V12h2.2l-.4 3h-1.8v6.9A10 10 0 0022 12z"/></svg></a>
+        <a href="#" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2c3.2 0 3.6 0 4.8.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.3 1 .4 2.2 0 1.2.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .3-2.2.4-1.2 0-1.6.1-4.8.1s-3.6 0-4.8-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.3-1-.4-2.2 0-1.2-.1-1.6-.1-4.8s0-3.6.1-4.8c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.3 2.2-.4 1.2 0 1.6-.1 4.8-.1M12 0C8.7 0 8.3 0 7.1.1 5.8.1 5 .3 4.2.6c-.8.3-1.5.7-2.2 1.4C1.3 2.7.9 3.4.6 4.2c-.3.8-.5 1.6-.5 2.9C0 8.3 0 8.7 0 12s0 3.7.1 4.9c0 1.3.2 2.1.5 2.9.3.8.7 1.5 1.4 2.2.7.7 1.4 1.1 2.2 1.4.8.3 1.6.5 2.9.5 1.3 0 1.7.1 4.9.1s3.7 0 4.9-.1c1.3 0 2.1-.2 2.9-.5.8-.3 1.5-.7 2.2-1.4.7-.7 1.1-1.4 1.4-2.2.3-.8.5-1.6.5-2.9 0-1.3.1-1.7.1-4.9s0-3.7-.1-4.9c0-1.3-.2-2.1-.5-2.9-.3-.8-.7-1.5-1.4-2.2C21.3 1.3 20.6.9 19.8.6 19 .3 18.2.1 16.9.1 15.7 0 15.3 0 12 0zm0 5.8a6.2 6.2 0 106.2 6.2A6.2 6.2 0 0012 5.8zm0 10.3a4 4 0 114-4 4 4 0 01-4 4zm6.5-11.9a1.4 1.4 0 101.4 1.4 1.4 1.4 0 00-1.4-1.4z"/></svg></a>
+        <a href="#" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 2h-17A1.5 1.5 0 002 3.5v17A1.5 1.5 0 003.5 22h17a1.5 1.5 0 001.5-1.5v-17A1.5 1.5 0 0020.5 2zM8 19H5V9h3zM6.5 7.7a1.8 1.8 0 111.8-1.7 1.8 1.8 0 01-1.8 1.7zM19 19h-3v-5c0-1.3-.5-2-1.5-2s-1.5.7-1.5 2v5h-3V9h3v1.4s.9-1.6 3-1.6a3.6 3.6 0 013 4z"/></svg></a>
+      </div>
+      <button class="chat-trigger" id="open-helpdesk" aria-label="Open help desk chat">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.02 2 11c0 2.68 1.32 5.08 3.43 6.76L4 22l4.64-1.39c1.04.31 2.17.48 3.36.48 5.52 0 10-4.02 10-9s-4.48-9-10-9z"/></svg>
+        Ask a Question
+      </button>
+      <button class="portal-btn">Member Portal Login</button>
+    </div>
+  </div>
+
+  <nav class="mainnav">
+    <ul>
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Members</a></li>
+      <li><a href="#">Consumer</a></li>
+      <li><a href="#">KY Academy of Real Estate</a></li>
+      <li><a href="#">Advocacy</a></li>
+      <li><a href="#">Foundation</a></li>
+      <li><a href="#">About</a></li>
+      <li><a href="#">APEX MLS</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-skyline"></div>
+    <div class="hero-content">
+      <div class="eyebrow">WELCOME TO THE</div>
+      <h1>GREATER LOUISVILLE ASSOCIATION OF REALTORS&reg;</h1>
+    </div>
+  </section>
+
+  <div class="notice">
+    <strong>HELP DESK DEMO</strong>
+    Click <a href="#" id="open-helpdesk-link">Ask a Question</a> in the top bar to try the new AI-powered help desk. It can answer questions about MLS Rules &amp; Regulations and the class calendar.
+  </div>
+
+  <main>
+    <p>This is a demonstration page for the embeddable Help Desk widget. The layout mirrors a typical real estate association site so we can see how the chat experience feels in context.</p>
+    <p>In production, the chat trigger in the top bar opens a slide-out panel where members and consumers can ask questions in plain language. Answers are grounded in official documents &mdash; MLS Rules &amp; Regulations, class schedules, and other approved content &mdash; rather than generic web data.</p>
+    <p>Replace this placeholder copy, swap in the real logo and hero imagery, and wire the widget to the backend API when ready.</p>
+  </main>
+
+  <script>
+    window.HELPDESK_CONFIG = {
+      apiUrl: 'https://helpdesk.adam-481.workers.dev/api/chat',
+      title: 'GLAR Help Desk',
+      subtitle: 'Ask about MLS rules or classes',
+      primaryColor: '#1f4e79',
+      hideLauncher: true,
+    };
+  </script>
+  <script src="widget.js" defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      function openChat(e) {
+        if (e) e.preventDefault();
+        if (window.HelpDesk) window.HelpDesk.open();
+      }
+      document.getElementById('open-helpdesk').addEventListener('click', openChat);
+      document.getElementById('open-helpdesk-link').addEventListener('click', openChat);
+    });
+  </script>
+</body>
+</html>

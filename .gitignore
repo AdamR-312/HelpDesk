@@ -1,0 +1,7 @@
+node_modules/
+.dev.vars
+.wrangler/
+rules.txt
+schedule.txt
+*.pdf
+.DS_Store

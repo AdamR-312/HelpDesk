@@ -1,0 +1,26 @@
+name = "helpdesk"
+main = "src/worker.js"
+compatibility_date = "2025-04-01"
+
+# Static assets (index.html, widget.js) served from ./public
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# KV namespace holding the extracted PDF text and class schedule.
+# Create with:  npx wrangler kv namespace create HELPDESK_KV
+# Then paste the returned id below.
+[[kv_namespaces]]
+binding = "HELPDESK_KV"
+id = "10cbe9b4409a413fae8036a4d21d397b"
+
+# Rate limiting — 20 requests per minute per IP.
+# Bindings API is still under the "unsafe" prefix as of early 2026.
+[[unsafe.bindings]]
+name = "RATE_LIMITER"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 20, period = 60 }
+
+# ANTHROPIC_API_KEY is set as a secret:  npx wrangler secret put ANTHROPIC_API_KEY
+# For local dev, put it in .dev.vars (see .dev.vars.example)
