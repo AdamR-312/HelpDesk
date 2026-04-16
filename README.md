@@ -61,10 +61,13 @@ npm run upload-samples-local
 npm run extract -- path/to/mls-rules.pdf rules.txt
 
 # Optionally prepare a schedule.txt (plain text, any format Claude can read)
+# Also prepare a contacts.txt listing the departments/emails/phone numbers
+# the bot should route to when it can't answer from the rules.
 
 # Upload to local KV (for wrangler dev)
 npm run upload-rules-local
 npm run upload-schedule-local
+npm run upload-contacts-local
 ```
 
 ## Run locally
@@ -83,6 +86,7 @@ Push the API key as a secret, upload KV content to the remote namespace, and dep
 npx wrangler secret put ANTHROPIC_API_KEY
 npm run upload-rules              # remote KV
 npm run upload-schedule           # remote KV
+npm run upload-contacts           # remote KV
 npm run deploy
 ```
 

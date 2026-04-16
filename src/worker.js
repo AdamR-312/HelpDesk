@@ -7,42 +7,41 @@ const MAX_HISTORY_TURNS = 6;
 const MAX_MESSAGE_LENGTH = 1000;
 const KV_RULES_KEY = 'rules_text';
 const KV_SCHEDULE_KEY = 'class_schedule';
+const KV_CONTACTS_KEY = 'contacts_directory';
+const CACHE_TTL_MS = 60_000;
 
-const SYSTEM_INSTRUCTIONS = `You are a help desk assistant for the Greater Louisville Association of REALTORS. You answer questions from members and consumers about the association's MLS Rules & Regulations and upcoming classes.
+const SYSTEM_BASE = `You are a help desk assistant. You answer questions using ONLY the reference material provided below.
 
 Rules:
 - Answer ONLY using the reference material provided below. Do not invent facts.
 - Keep answers concise (2-4 sentences) unless the user explicitly asks for more detail.
 - Quote specific rule numbers or class names when relevant.
-- Do not answer questions unrelated to the association, its rules, or its classes.
+- Do not answer questions unrelated to the reference material.
 
-When you cannot give a confident answer from the reference material, do NOT guess. Instead, direct the user to the appropriate contact below based on the nature of their question. Always include the phone number as a fallback.
+When you cannot give a confident answer from the reference material, do NOT guess. Instead, direct the user to the most relevant contact listed in the contact directory below. Always include a phone number as a fallback when one is provided.
 
-Contact directory:
-- General MLS questions (listings, data, system access): Support@LouisvilleRealtors.com
-- MLS compliance and rule violations: Compliance@ApexMLS.com
-- Classes, CE credits, and education: Education@LouisvilleRealtors.com
-- Billing, dues, invoices, payments: Accounting@LouisvilleRealtors.com
-- Membership applications, status, renewals: Membership@LouisvilleRealtors.com
-- Phone (all departments): (502) 894-9860
+Pick the single most relevant contact based on the question's topic. If unsure, default to the first entry plus any phone number listed.`;
 
-When providing contact info, format it clearly — for example:
-"I don't have that information in my reference material. For this question, please contact our Education department at Education@LouisvilleRealtors.com or call (502) 894-9860."
-
-Pick the single most relevant email based on the question's topic. If unsure which department fits, default to Support@LouisvilleRealtors.com plus the phone number.`;
-
-// In-isolate cache so we don't re-read KV on every request within the same isolate
-let rulesCache = null;
-let scheduleCache = null;
+// In-isolate cache with TTL so KV updates propagate within CACHE_TTL_MS.
+const contextCache = { value: null, loadedAt: 0 };
 
 async function loadContext(env) {
-  if (rulesCache === null) {
-    rulesCache = (await env.HELPDESK_KV.get(KV_RULES_KEY)) || '';
+  const now = Date.now();
+  if (contextCache.value && now - contextCache.loadedAt < CACHE_TTL_MS) {
+    return contextCache.value;
   }
-  if (scheduleCache === null) {
-    scheduleCache = (await env.HELPDESK_KV.get(KV_SCHEDULE_KEY)) || '';
-  }
-  return { rules: rulesCache, schedule: scheduleCache };
+  const [rules, schedule, contacts] = await Promise.all([
+    env.HELPDESK_KV.get(KV_RULES_KEY),
+    env.HELPDESK_KV.get(KV_SCHEDULE_KEY),
+    env.HELPDESK_KV.get(KV_CONTACTS_KEY),
+  ]);
+  contextCache.value = {
+    rules: rules || '',
+    schedule: schedule || '',
+    contacts: contacts || '',
+  };
+  contextCache.loadedAt = now;
+  return contextCache.value;
 }
 
 async function handleChat(request, env) {
@@ -61,23 +60,29 @@ async function handleChat(request, env) {
     return json({ error: 'message too long' }, 400);
   }
 
+  if (env.GLOBAL_RATE_LIMITER) {
+    const { success } = await env.GLOBAL_RATE_LIMITER.limit({ key: 'global' });
+    if (!success) return json({ error: 'Service is busy. Please try again shortly.' }, 429);
+  }
+
   if (env.RATE_LIMITER) {
     const ip = request.headers.get('cf-connecting-ip') || 'unknown';
     const { success } = await env.RATE_LIMITER.limit({ key: ip });
     if (!success) return json({ error: 'Too many requests. Please wait a moment.' }, 429);
   }
 
-  const { rules, schedule } = await loadContext(env);
+  const { rules, schedule, contacts } = await loadContext(env);
   if (!rules && !schedule) {
     return json({ error: 'knowledge base not loaded — run the ingest script' }, 503);
   }
 
   const referenceBlock =
-    `<mls_rules>\n${rules || '(none loaded)'}\n</mls_rules>\n\n` +
-    `<class_schedule>\n${schedule || '(none loaded)'}\n</class_schedule>`;
+    `<reference_material>\n${rules || '(none loaded)'}\n</reference_material>\n\n` +
+    `<class_schedule>\n${schedule || '(none loaded)'}\n</class_schedule>\n\n` +
+    `<contact_directory>\n${contacts || '(none loaded)'}\n</contact_directory>`;
 
   const systemBlocks = [
-    { type: 'text', text: SYSTEM_INSTRUCTIONS },
+    { type: 'text', text: SYSTEM_BASE },
     {
       type: 'text',
       text: referenceBlock,
@@ -129,22 +134,40 @@ function json(obj, status = 200) {
     status,
     headers: {
       'content-type': 'application/json',
-      'access-control-allow-origin': '*',
       'cache-control': 'no-store',
     },
   });
 }
 
-function corsPreflight() {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      'access-control-allow-origin': '*',
-      'access-control-allow-methods': 'POST, OPTIONS',
-      'access-control-allow-headers': 'content-type',
-      'access-control-max-age': '86400',
-    },
-  });
+function getAllowedOrigins(env) {
+  const raw = env.ALLOWED_ORIGINS || '';
+  return raw.split(',').map((s) => s.trim()).filter(Boolean);
+}
+
+function withCors(response, request, env) {
+  const origin = request.headers.get('origin');
+  const allowed = getAllowedOrigins(env);
+  const headers = new Headers(response.headers);
+  headers.append('vary', 'Origin');
+  if (origin && allowed.includes(origin)) {
+    headers.set('access-control-allow-origin', origin);
+  }
+  return new Response(response.body, { status: response.status, headers });
+}
+
+function corsPreflight(request, env) {
+  const origin = request.headers.get('origin');
+  const allowed = getAllowedOrigins(env);
+  const headers = {
+    'access-control-allow-methods': 'POST, OPTIONS',
+    'access-control-allow-headers': 'content-type',
+    'access-control-max-age': '86400',
+    'vary': 'Origin',
+  };
+  if (origin && allowed.includes(origin)) {
+    headers['access-control-allow-origin'] = origin;
+  }
+  return new Response(null, { status: 204, headers });
 }
 
 export default {
@@ -152,13 +175,14 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === '/api/chat') {
-      if (request.method === 'OPTIONS') return corsPreflight();
-      if (request.method !== 'POST') return json({ error: 'POST only' }, 405);
+      if (request.method === 'OPTIONS') return corsPreflight(request, env);
+      if (request.method !== 'POST') return withCors(json({ error: 'POST only' }, 405), request, env);
       try {
-        return await handleChat(request, env);
+        const res = await handleChat(request, env);
+        return withCors(res, request, env);
       } catch (e) {
         console.error('handleChat error', e);
-        return json({ error: 'server error' }, 500);
+        return withCors(json({ error: 'server error' }, 500), request, env);
       }
     }
 

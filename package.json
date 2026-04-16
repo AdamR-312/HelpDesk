@@ -11,7 +11,9 @@
     "upload-rules": "wrangler kv key put --binding=HELPDESK_KV rules_text --path=rules.txt",
     "upload-schedule-local": "wrangler kv key put --binding=HELPDESK_KV --local class_schedule --path=schedule.txt",
     "upload-schedule": "wrangler kv key put --binding=HELPDESK_KV class_schedule --path=schedule.txt",
-    "upload-samples-local": "wrangler kv key put --binding=HELPDESK_KV --local rules_text --path=scripts/sample-rules.txt && wrangler kv key put --binding=HELPDESK_KV --local class_schedule --path=scripts/sample-schedule.txt"
+    "upload-contacts-local": "wrangler kv key put --binding=HELPDESK_KV --local contacts_directory --path=contacts.txt",
+    "upload-contacts": "wrangler kv key put --binding=HELPDESK_KV contacts_directory --path=contacts.txt",
+    "upload-samples-local": "wrangler kv key put --binding=HELPDESK_KV --local rules_text --path=scripts/sample-rules.txt && wrangler kv key put --binding=HELPDESK_KV --local class_schedule --path=scripts/sample-schedule.txt && wrangler kv key put --binding=HELPDESK_KV --local contacts_directory --path=scripts/sample-contacts.txt"
   },
   "devDependencies": {
     "pdf-parse": "^1.1.1",

@@ -28,7 +28,8 @@
     .hd-close:hover { opacity: 1; background: rgba(255,255,255,0.1); }
     .hd-messages { flex: 1; overflow-y: auto; padding: 16px; background: #f7f8fa; display: flex; flex-direction: column; gap: 10px; }
     .hd-msg { max-width: 85%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.45; word-wrap: break-word; }
-    .hd-msg-bot { background: #fff; color: #1a1a1a; align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .hd-msg-bot { background: #fff; color: #1a1a1a; align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); white-space: pre-wrap; }
+    .hd-msg-bot a { color: ${CONFIG.primaryColor}; text-decoration: underline; }
     .hd-msg-user { background: ${CONFIG.primaryColor}; color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
     .hd-msg-error { background: #fdecea; color: #8a1f11; align-self: flex-start; border: 1px solid #f5c6c2; }
     .hd-typing { display: flex; gap: 4px; padding: 12px 14px; background: #fff; border-radius: 14px; border-bottom-left-radius: 4px; align-self: flex-start; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
@@ -63,6 +64,7 @@
     open: false,
     sending: false,
     history: [],
+    inflight: null,
   };
 
   let refs = {};
@@ -153,12 +155,43 @@
         appendMessage('bot', CONFIG.welcomeMessage);
       }
       setTimeout(() => refs.input.focus(), 100);
+    } else if (state.inflight) {
+      state.inflight.abort();
     }
+  }
+
+  // Matches emails and common US phone formats (including the parenthesized area code style).
+  const LINK_RE = /([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})|(\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4})/gi;
+
+  function buildBotContent(text) {
+    const frag = document.createDocumentFragment();
+    let lastIndex = 0;
+    let match;
+    LINK_RE.lastIndex = 0;
+    while ((match = LINK_RE.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        frag.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+      }
+      const token = match[0];
+      const isEmail = match[1] !== undefined;
+      const href = isEmail ? `mailto:${token}` : `tel:${token.replace(/[^\d+]/g, '')}`;
+      const a = document.createElement('a');
+      a.href = href;
+      a.textContent = token;
+      if (!isEmail) a.setAttribute('aria-label', `Call ${token}`);
+      frag.appendChild(a);
+      lastIndex = match.index + token.length;
+    }
+    if (lastIndex < text.length) {
+      frag.appendChild(document.createTextNode(text.slice(lastIndex)));
+    }
+    return frag;
   }
 
   function appendMessage(role, text) {
     const cls = role === 'user' ? 'hd-msg hd-msg-user' : role === 'error' ? 'hd-msg hd-msg-error' : 'hd-msg hd-msg-bot';
-    const node = h('div', { class: cls }, text);
+    const content = role === 'bot' ? buildBotContent(text) : document.createTextNode(text);
+    const node = h('div', { class: cls }, content);
     refs.messages.appendChild(node);
     refs.messages.scrollTop = refs.messages.scrollHeight;
     if (role !== 'error') state.history.push({ role, text });
@@ -200,17 +233,27 @@
   }
 
   async function sendToBackend(message) {
-    const res = await fetch(CONFIG.apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message,
-        history: state.history.slice(-10),
-      }),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    return data.reply || data.message || '(no response)';
+    // Exclude the just-appended user turn — the server re-appends `message` itself.
+    const prior = state.history.slice(0, -1).slice(-10);
+
+    const controller = new AbortController();
+    state.inflight = controller;
+    const timeout = setTimeout(() => controller.abort(), 30000);
+
+    try {
+      const res = await fetch(CONFIG.apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, history: prior }),
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      return data.reply || data.message || '(no response)';
+    } finally {
+      clearTimeout(timeout);
+      if (state.inflight === controller) state.inflight = null;
+    }
   }
 
   function init() {
